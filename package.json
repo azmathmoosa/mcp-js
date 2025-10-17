@@ -1,0 +1,47 @@
+{
+  "name": "mcp-js",
+  "version": "0.1.0",
+  "description": "Browser-native MCP runtime for handling LLM tool calls",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "mcp",
+    "llm",
+    "tool-calls",
+    "browser",
+    "runtime",
+    "javascript"
+  ],
+  "author": "Azmath Moosa <azmathmoosa@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azmathmoosa/mcp-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/azmathmoosa/mcp-js/issues"
+  },
+  "homepage": "https://github.com/azmathmoosa/mcp-js#readme",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.10"
+  }
+}

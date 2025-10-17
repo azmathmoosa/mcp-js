@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP-JS Flowchart Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin: 10px 20px;
+            text-align: center;
+            font-size: 24px;
+            padding: 0;
+        }
+        
+        .demo-content {
+            flex: 1;
+            display: flex;
+            padding: 10px 20px 20px 20px;
+            gap: 20px;
+        }
+        
+        .controls-panel {
+            width: 280px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .controls-header {
+            background: #007acc;
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+        }
+        
+        .controls-content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .icon-btn {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .icon-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .icon-btn:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .icon-btn.secondary {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .icon-btn.secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .icon-btn.danger {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .icon-btn.danger:hover {
+            background-color: #e9ecef;
+        }
+        
+        .icon-btn.success {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .icon-btn.success:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Chat interface styles */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 60vh;
+            max-height: 60vh;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: scroll;
+            background: #f8f9fa;
+            font-size: 12px;            
+            max-height: 55vh;
+        }
+        
+        /* Custom scrollbar styling for chat messages */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .chat-message {
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+        }
+        
+        .chat-message.user {
+            background: #007acc;
+            color: white;
+            margin-left: 20px;
+        }
+        
+        .chat-message.assistant {
+            background: white;
+            border: 1px solid #ddd;
+            margin-right: 20px;
+        }
+        
+        .chat-message.system {
+            background: #28a745;
+            color: white;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .hint-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .hint-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #333;
+        }
+        
+        .hint-btn:hover {
+            background: #e9ecef;
+            color: #000;
+        }
+        
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #005a8b;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .secondary-btn {
+            background-color: #6c757d;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #545b62;
+        }
+        
+        .danger-btn {
+            background-color: #dc3545;
+        }
+        
+        .danger-btn:hover {
+            background-color: #c82333;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .canvas-panel {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .canvas-header {
+            background: #f9f9f9;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .canvas-info {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .canvas-content {
+            position: relative;
+            height: calc(100% - 60px);
+            overflow: hidden;
+        }
+        
+        #flowchart-canvas {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+                        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            cursor: grab;
+        }
+        
+        #flowchart-canvas:active {
+            cursor: grabbing;
+        }
+        
+        .node {
+            position: absolute;
+            background: #fff;
+            border: 2px solid #007acc;
+            border-radius: 8px;
+            padding: 10px 15px;
+            min-width: 80px;
+            text-align: center;
+            cursor: move;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        
+        .node:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .node.selected {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.4);
+            background: #fff5f5;
+        }
+        
+        .node.connecting {
+            border-color: #ffc107;
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+        }
+        
+        .node.dragging {
+            z-index: 20;
+        }
+        
+        .node::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px dashed transparent;
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        
+        .node::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 16px;
+            pointer-events: auto;
+            z-index: -1;
+        }
+        
+        .node.hover-connect::before {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+        
+        .node.connection-zone::before {
+            border-color: #007acc;
+            border-style: dashed;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .connection-preview {
+            stroke: #28a745;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5,5;
+            pointer-events: none;
+        }
+        
+        .connection {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .connection-line {
+            stroke: #007acc;
+            stroke-width: 2;
+            fill: none;
+            cursor: pointer;
+        }
+        
+        .connection-line:hover {
+            stroke: #005a8b;
+            stroke-width: 3;
+        }
+        
+        .connection-line.selected {
+            stroke: #dc3545;
+            stroke-width: 3;
+            stroke-dasharray: 5,5;
+        }
+        
+        .connection-arrow {
+            fill: #007acc;
+        }
+        
+        .connection-arrow.selected {
+            fill: #dc3545;
+        }
+        
+        .status-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            height: 120px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* Floating Status Card */
+        .floating-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .floating-status-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .floating-status-content {
+            padding: 15px;
+        }
+
+        .floating-status .status-info {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .floating-status .status-log {
+            height: 100px;
+            margin-top: 8px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+        
+        .log-success {
+            color: #28a745;
+        }
+        
+        .log-error {
+            color: #dc3545;
+        }
+        
+        .log-info {
+            color: #007acc;
+        }
+        
+        /* MCP Functions Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .function-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .function-item {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .function-name {
+            font-weight: bold;
+            color: #007acc;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .function-description {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .function-schema {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #495057;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">        
+        <div class="demo-content">
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="controls-header">
+                    🧠 LLM Chat Window
+                </div>
+                <div class="controls-content">
+                    <div class="control-group">
+                        <h3>Quick Actions</h3>
+                        <div class="button-group">
+                            <button class="icon-btn tooltip" data-tooltip="Add Node" onclick="showAddNodeDialog()">➕</button>
+                            <button class="icon-btn secondary tooltip" data-tooltip="Normal Mode" id="normalBtn" onclick="normalMode()">✋</button>
+                            <button class="icon-btn tooltip" data-tooltip="Connect Mode" id="connectBtn" onclick="connectMode()">🔗</button>
+                            <button class="icon-btn danger tooltip" data-tooltip="Delete Mode" id="deleteBtn" onclick="deleteMode()">🗑️</button>
+                            <button class="icon-btn secondary tooltip" data-tooltip="Center Nodes" onclick="centerNodes()">🎯</button>
+                            <button class="icon-btn secondary tooltip" data-tooltip="Reset Zoom" onclick="resetZoom()">🔍</button>
+                            <button class="icon-btn danger tooltip" data-tooltip="Clear All" onclick="clearCanvas()">🧹</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Selection</h3>
+                        <div id="selectionInfo" style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                            Nothing selected
+                        </div>
+                        <div class="button-group">
+                            <button class="icon-btn danger tooltip" data-tooltip="Delete Selected" onclick="deleteSelected()" id="deleteSelectedBtn" disabled>🗑️</button>
+                            <button class="icon-btn secondary tooltip" data-tooltip="Select All" onclick="selectAll()">📋</button>
+                            <button class="icon-btn secondary tooltip" data-tooltip="Clear Selection" onclick="clearSelection()">❌</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>💬 Chat with AI</h3>
+                        <div class="hint-buttons">
+                            <button class="hint-btn" onclick="insertHint('Explain user authentication flow')">🔐 Auth Flow</button>
+                            <button class="hint-btn" onclick="insertHint('Show microservices architecture')">🏗️ Architecture</button>
+                        </div>
+                        <div class="chat-container">
+                            <div id="chatMessages" class="chat-messages">
+                                <!-- <div class="chat-message system">
+                                    Welcome! Ask me to create flowcharts, and I'll use MCP tools to build them for you.
+                                </div> -->
+                            </div>
+                            <div class="chat-input-container">
+                                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me to create a flowchart..." onkeypress="handleChatKeyPress(event)">
+                                <button class="icon-btn tooltip" data-tooltip="Send Message" onclick="sendChatMessage()">📤</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Canvas Panel -->
+            <div class="canvas-panel">
+                <div class="canvas-header">
+                    <span>🎨 Interactive Canvas with functions exposed to LLM via MCP-JS</span>
+                    <button class="icon-btn secondary tooltip" data-tooltip="View MCP Functions" onclick="showMCPFunctions()">🔧 View MCP Tools </button>
+                    <div class="canvas-info">
+                        💡 Drag center to move, drag edge to connect, wheel to zoom, drag canvas to pan
+                    </div>
+                </div>
+                <div class="canvas-content">
+                    <div id="flowchart-canvas">
+                        <!-- Transform container for both nodes and connections - single coordinate system -->
+                        <div id="canvas-transform-container" style="position: absolute; top: 0; left: 0; transform-origin: 0 0; width: 100%; height: 100%; pointer-events: none;">
+                            <!-- SVG for connections - inside transform container -->
+                            <svg id="connections-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="16" markerHeight="12" 
+                                            refX="8" refY="6" orient="auto" markerUnits="strokeWidth">
+                                        <polygon points="0 0, 16 6, 0 12" fill="#007acc" />
+                                    </marker>
+                                    <marker id="arrowhead-selected" markerWidth="16" markerHeight="12" 
+                                            refX="8" refY="6" orient="auto" markerUnits="strokeWidth">
+                                        <polygon points="0 0, 16 6, 0 12" fill="#dc3545" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                            <!-- Nodes will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Status Card -->
+        <div class="floating-status">
+            <div class="floating-status-header">
+                📊 Status & Logs
+            </div>
+            <div class="floating-status-content">
+                <div class="status-info">
+                    <span id="nodeCount">Nodes: 0</span> | 
+                    <span id="connectionCount">Connections: 0</span>
+                </div>
+                <div class="status-info">
+                    <span id="currentMode">Mode: Normal</span>
+                </div>
+                <div id="statusLog" class="status-log"></div>
+                <button class="icon-btn secondary tooltip" data-tooltip="Clear Log" onclick="clearLog()" style="margin-top: 8px; width: 100%; font-size: 11px;">🧹 Clear Log</button>
+            </div>
+        </div>
+        
+        <!-- MCP Functions Modal -->
+        <div id="mcpModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">🔧 Registered MCP Functions</h2>
+                    <button class="close-btn" onclick="closeMCPModal()">&times;</button>
+                </div>
+                <div id="functionList" class="function-list">
+                    <!-- Function list will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import mcp-js
+        import mcp from '../src/index.js';
+        
+        // Global state
+        let nodes = [];
+        let connections = [];
+        let currentMode = 'normal'; // 'normal', 'connect', 'delete'
+        let selectedNodes = new Set();
+        let selectedConnections = new Set();
+        let connectingFrom = null;
+        let nextNodeId = 1;
+        let dragState = {
+            isDragging: false,
+            draggedNode: null,
+            offset: { x: 0, y: 0 },
+            isConnecting: false,
+            previewLine: null
+        };
+        
+        // Canvas pan and zoom state
+        let canvasTransform = {
+            x: 0,
+            y: 0,
+            scale: 1
+        };
+        
+        let canvasPanState = {
+            isPanning: false,
+            startX: 0,
+            startY: 0,
+            startTransformX: 0,
+            startTransformY: 0
+        };
+        
+        // Canvas references
+        const canvas = document.getElementById('flowchart-canvas');
+        const transformContainer = document.getElementById('canvas-transform-container');
+        const svg = document.getElementById('connections-svg');
+        
+        // Apply canvas transform
+        function applyCanvasTransform() {
+            const transform = `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`;
+            
+            // Apply transform to the single container - nodes and SVG use same coordinate system
+            transformContainer.style.transform = transform;
+        }
+        
+        // Initialize SVG dimensions
+        function initializeSVG() {
+            const canvasWidth = canvas.offsetWidth;
+            const canvasHeight = canvas.offsetHeight;
+            
+            svg.setAttribute('width', canvasWidth);
+            svg.setAttribute('height', canvasHeight);
+            svg.setAttribute('viewBox', `0 0 ${canvasWidth} ${canvasHeight}`);
+        }
+        
+        // Convert screen coordinates to canvas coordinates
+        function screenToCanvas(screenX, screenY) {
+            return {
+                x: (screenX - canvasTransform.x) / canvasTransform.scale,
+                y: (screenY - canvasTransform.y) / canvasTransform.scale
+            };
+        }
+        
+        // Convert canvas coordinates to screen coordinates
+        function canvasToScreen(canvasX, canvasY) {
+            return {
+                x: canvasX * canvasTransform.scale + canvasTransform.x,
+                y: canvasY * canvasTransform.scale + canvasTransform.y
+            };
+        }
+        
+        // Initialize MCP tools for flowchart operations
+        function initializeMCPTools() {
+            // Node creation and management
+            mcp.register('add_node', ({ label, x, y }) => {
+                const node = createNodeData(label, x, y);
+                nodes.push(node);
+                renderNode(node);
+                updateStatus();
+                log(`Added node: ${label}`, 'success');
+                return { success: true, nodeId: node.id, label: node.label, x: node.x, y: node.y };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        label: { type: 'string', description: 'Node label' },
+                        x: { type: 'number', description: 'X position (optional)' },
+                        y: { type: 'number', description: 'Y position (optional)' }
+                    },
+                    required: ['label']
+                },
+                description: 'Add a new node to the flowchart'
+            });
+
+            mcp.register('add_decision_node', ({ label, x, y }) => {
+                const node = createNodeData(label, x, y);
+                nodes.push(node);
+                renderNode(node);
+                // Style as decision node
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                nodeElement.style.borderRadius = '50%';
+                nodeElement.style.backgroundColor = '#fff3cd';
+                nodeElement.style.borderColor = '#ffc107';
+                updateStatus();
+                log(`Added decision node: ${label}`, 'success');
+                return { success: true, nodeId: node.id, label: node.label, x: node.x, y: node.y };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        label: { type: 'string', description: 'Decision node label' },
+                        x: { type: 'number', description: 'X position (optional)' },
+                        y: { type: 'number', description: 'Y position (optional)' }
+                    },
+                    required: ['label']
+                },
+                description: 'Add a decision/conditional node to the flowchart'
+            });
+
+            mcp.register('add_start_node', ({ label, x, y }) => {
+                const node = createNodeData(label || 'Start', x, y);
+                nodes.push(node);
+                renderNode(node);
+                // Style as start node
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                nodeElement.style.borderRadius = '20px';
+                nodeElement.style.backgroundColor = '#d1ecf1';
+                nodeElement.style.borderColor = '#17a2b8';
+                updateStatus();
+                log(`Added start node: ${node.label}`, 'success');
+                return { success: true, nodeId: node.id, label: node.label, x: node.x, y: node.y };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        label: { type: 'string', description: 'Start node label (optional, defaults to "Start")' },
+                        x: { type: 'number', description: 'X position (optional)' },
+                        y: { type: 'number', description: 'Y position (optional)' }
+                    }
+                },
+                description: 'Add a start/entry point node to the flowchart'
+            });
+
+            mcp.register('add_end_node', ({ label, x, y }) => {
+                const node = createNodeData(label || 'End', x, y);
+                nodes.push(node);
+                renderNode(node);
+                // Style as end node
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                nodeElement.style.borderRadius = '20px';
+                nodeElement.style.backgroundColor = '#f8d7da';
+                nodeElement.style.borderColor = '#dc3545';
+                updateStatus();
+                log(`Added end node: ${node.label}`, 'success');
+                return { success: true, nodeId: node.id, label: node.label, x: node.x, y: node.y };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        label: { type: 'string', description: 'End node label (optional, defaults to "End")' },
+                        x: { type: 'number', description: 'X position (optional)' },
+                        y: { type: 'number', description: 'Y position (optional)' }
+                    }
+                },
+                description: 'Add an end/exit point node to the flowchart'
+            });
+            
+            // Connection management
+            mcp.register('connect_nodes', ({ from, to, label }) => {
+                const fromNode = nodes.find(n => n.label === from || n.id === from);
+                const toNode = nodes.find(n => n.label === to || n.id === to);
+                
+                if (!fromNode || !toNode) {
+                    throw new Error(`Could not find nodes: ${from} -> ${to}`);
+                }
+                
+                const connection = {
+                    id: Date.now(),
+                    from: fromNode.id,
+                    to: toNode.id,
+                    label: label || null
+                };
+                
+                connections.push(connection);
+                renderConnection(connection);
+                updateStatus();
+                log(`Connected: ${fromNode.label} -> ${toNode.label}${label ? ` (${label})` : ''}`, 'success');
+                return { success: true, from: fromNode.label, to: toNode.label, label: label };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        from: { type: 'string', description: 'Source node label or ID' },
+                        to: { type: 'string', description: 'Target node label or ID' },
+                        label: { type: 'string', description: 'Optional connection label (e.g., "Yes", "No", "Error")' }
+                    },
+                    required: ['from', 'to']
+                },
+                description: 'Connect two nodes with an arrow'
+            });
+            
+            // Node deletion and management
+            mcp.register('delete_node', ({ label }) => {
+                const nodeIndex = nodes.findIndex(n => n.label === label || n.id === label);
+                if (nodeIndex === -1) {
+                    throw new Error(`Node not found: ${label}`);
+                }
+                
+                const node = nodes[nodeIndex];
+                connections = connections.filter(c => c.from !== node.id && c.to !== node.id);
+                nodes.splice(nodeIndex, 1);
+                const element = document.getElementById(`node-${node.id}`);
+                if (element) element.remove();
+                
+                renderAllConnections();
+                updateStatus();
+                log(`Deleted node: ${node.label}`, 'success');
+                return { success: true, deletedNode: node.label };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        label: { type: 'string', description: 'Node label or ID to delete' }
+                    },
+                    required: ['label']
+                },
+                description: 'Delete a node and its connections'
+            });
+
+            // Canvas management
+            mcp.register('clear_canvas', () => {
+                nodes = [];
+                connections = [];
+                transformContainer.querySelectorAll('.node').forEach(node => node.remove());
+                svg.innerHTML = svg.querySelector('defs').outerHTML;
+                updateStatus();
+                log('Canvas cleared', 'success');
+                return { success: true, message: 'Canvas cleared' };
+            }, {
+                schema: { type: 'object', properties: {} },
+                description: 'Clear all nodes and connections from canvas'
+            });
+
+            mcp.register('center_nodes', () => {
+                if (nodes.length === 0) {
+                    return { success: false, message: 'No nodes to center' };
+                }
+                
+                const canvasWidth = canvas.offsetWidth / canvasTransform.scale;
+                const canvasHeight = canvas.offsetHeight / canvasTransform.scale;
+                const centerX = canvasWidth / 2;
+                const centerY = canvasHeight / 2;
+                const radius = Math.min(centerX, centerY) * 0.6;
+                
+                nodes.forEach((node, index) => {
+                    const angle = (index / nodes.length) * 2 * Math.PI;
+                    node.x = centerX + Math.cos(angle) * radius - 50;
+                    node.y = centerY + Math.sin(angle) * radius - 20;
+                    
+                    const element = document.getElementById(`node-${node.id}`);
+                    element.style.left = node.x + 'px';
+                    element.style.top = node.y + 'px';
+                });
+                
+                renderAllConnections();
+                log('Nodes centered in circular layout', 'success');
+                return { success: true, message: 'Nodes centered' };
+            }, {
+                schema: { type: 'object', properties: {} },
+                description: 'Arrange all nodes in a circular layout at the center of the canvas'
+            });
+
+            mcp.register('arrange_flow', ({ direction = 'horizontal' }) => {
+                if (nodes.length === 0) {
+                    return { success: false, message: 'No nodes to arrange' };
+                }
+                
+                const canvasWidth = canvas.offsetWidth / canvasTransform.scale;
+                const canvasHeight = canvas.offsetHeight / canvasTransform.scale;
+                const spacing = direction === 'horizontal' ? 150 : 80;
+                const startX = direction === 'horizontal' ? 100 : canvasWidth / 2 - 50;
+                const startY = direction === 'horizontal' ? canvasHeight / 2 - 20 : 100;
+                
+                nodes.forEach((node, index) => {
+                    if (direction === 'horizontal') {
+                        node.x = startX + index * spacing;
+                        node.y = startY;
+                    } else {
+                        node.x = startX;
+                        node.y = startY + index * spacing;
+                    }
+                    
+                    const element = document.getElementById(`node-${node.id}`);
+                    element.style.left = node.x + 'px';
+                    element.style.top = node.y + 'px';
+                });
+                
+                renderAllConnections();
+                log(`Nodes arranged in ${direction} flow`, 'success');
+                return { success: true, message: `Nodes arranged ${direction}ly` };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        direction: { 
+                            type: 'string', 
+                            enum: ['horizontal', 'vertical'],
+                            description: 'Layout direction (horizontal or vertical)' 
+                        }
+                    }
+                },
+                description: 'Arrange nodes in a linear flow layout'
+            });
+            
+            // Utility tools
+            mcp.register('log_message', ({ text }) => {
+                log(text, 'info');
+                return { success: true, message: text };
+            }, {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        text: { type: 'string', description: 'Message to log' }
+                    },
+                    required: ['text']
+                },
+                description: 'Log a message to the status log'
+            });
+
+            mcp.register('get_canvas_info', () => {
+                return {
+                    success: true,
+                    nodes: nodes.map(n => ({ id: n.id, label: n.label, x: n.x, y: n.y })),
+                    connections: connections.map(c => ({ 
+                        id: c.id, 
+                        from: nodes.find(n => n.id === c.from)?.label,
+                        to: nodes.find(n => n.id === c.to)?.label,
+                        label: c.label 
+                    })),
+                    nodeCount: nodes.length,
+                    connectionCount: connections.length
+                };
+            }, {
+                schema: { type: 'object', properties: {} },
+                description: 'Get information about current canvas state including all nodes and connections'
+            });
+            
+            log('MCP tools initialized (add_node, add_decision_node, add_start_node, add_end_node, connect_nodes, delete_node, clear_canvas, center_nodes, arrange_flow, log_message, get_canvas_info)', 'success');
+        }
+        
+        // Node creation and management
+        function createNodeData(label, x = null, y = null) {
+            const canvasWidth = canvas.offsetWidth / canvasTransform.scale;
+            const canvasHeight = canvas.offsetHeight / canvasTransform.scale;
+            
+            return {
+                id: nextNodeId++,
+                label: label || `Node ${nextNodeId - 1}`,
+                x: x || Math.random() * (canvasWidth - 100) + 50,
+                y: y || Math.random() * (canvasHeight - 50) + 25
+            };
+        }
+        
+        function renderNode(node) {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.id = `node-${node.id}`;
+            nodeElement.textContent = node.label;
+            nodeElement.style.left = node.x + 'px';
+            nodeElement.style.top = node.y + 'px';
+            nodeElement.style.pointerEvents = 'auto'; // Enable pointer events for nodes
+            
+            // Add event listeners
+            nodeElement.addEventListener('mousedown', (e) => handleNodeMouseDown(e, node));
+            nodeElement.addEventListener('mousemove', (e) => handleNodeMouseMove(e, node));
+            nodeElement.addEventListener('mouseenter', (e) => handleNodeMouseEnter(e, node));
+            nodeElement.addEventListener('mouseleave', (e) => handleNodeMouseLeave(e, node));
+            nodeElement.addEventListener('click', (e) => handleNodeClick(e, node));
+            
+            transformContainer.appendChild(nodeElement);
+        }
+        
+        function handleNodeMouseDown(e, node) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const canvasCoords = screenToCanvas(screenX, screenY);
+            
+            const nodeElement = document.getElementById(`node-${node.id}`);
+            const nodeRect = nodeElement.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            // Calculate click position relative to the node element in canvas space
+            const nodeScreenX = nodeRect.left - canvasRect.left;
+            const nodeScreenY = nodeRect.top - canvasRect.top;
+            const nodeCanvasCoords = screenToCanvas(nodeScreenX, nodeScreenY);
+            
+            const clickX = canvasCoords.x - nodeCanvasCoords.x;
+            const clickY = canvasCoords.y - nodeCanvasCoords.y;
+            const nodeWidth = nodeRect.width / canvasTransform.scale;
+            const nodeHeight = nodeRect.height / canvasTransform.scale;
+            
+            // Check if click is in proximity zone (including the invisible ::after area)
+            const proximityZone = 15; // pixels around the node
+            const isInProximityZone = clickX < -proximityZone || clickX > nodeWidth + proximityZone || 
+                                     clickY < -proximityZone || clickY > nodeHeight + proximityZone;
+            
+            // Check if click is on the node border or in proximity
+            const borderZone = 8; // pixels from edge of visible node (reduced from 15)
+            const isInBorderZone = clickX < borderZone || clickX > nodeWidth - borderZone || 
+                                   clickY < borderZone || clickY > nodeHeight - borderZone;
+            
+            // If we're outside the node but within proximity, or on the border, start connection
+            if (currentMode === 'normal' && (isInProximityZone || isInBorderZone)) {
+                // Start connection mode
+                startConnectionDrag(e, node, rect);
+            } else if (currentMode === 'normal') {
+                // Start regular drag (center area)
+                startNodeDrag(e, node, rect, nodeElement);
+            }
+        }
+        
+        function startNodeDrag(e, node, canvasRect, nodeElement) {
+            dragState.isDragging = true;
+            dragState.draggedNode = node;
+            
+            // Use screen coordinates for offset calculation
+            dragState.offset.x = e.clientX - canvasRect.left - (node.x * canvasTransform.scale + canvasTransform.x);
+            dragState.offset.y = e.clientY - canvasRect.top - (node.y * canvasTransform.scale + canvasTransform.y);
+            
+            nodeElement.classList.add('dragging');
+            
+            // Add global mouse listeners
+            const mouseMoveHandler = (e) => handleNodeDrag(e);
+            const mouseUpHandler = (e) => endNodeDrag(e, nodeElement, mouseMoveHandler, mouseUpHandler);
+            
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        }
+        
+        function handleNodeDrag(e) {
+            if (!dragState.isDragging || !dragState.draggedNode) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            
+            const node = dragState.draggedNode;
+            
+            // Calculate new node position in canvas space
+            const newScreenX = screenX - dragState.offset.x;
+            const newScreenY = screenY - dragState.offset.y;
+            const newCanvasCoords = screenToCanvas(newScreenX, newScreenY);
+            
+            node.x = newCanvasCoords.x;
+            node.y = newCanvasCoords.y;
+            
+            // Keep node within canvas bounds (in canvas space)
+            const canvasWidth = canvas.offsetWidth / canvasTransform.scale;
+            const canvasHeight = canvas.offsetHeight / canvasTransform.scale;
+            node.x = Math.max(0, Math.min(canvasWidth - 100, node.x));
+            node.y = Math.max(0, Math.min(canvasHeight - 40, node.y));
+            
+            const nodeElement = document.getElementById(`node-${node.id}`);
+            nodeElement.style.left = node.x + 'px';
+            nodeElement.style.top = node.y + 'px';
+            
+            renderAllConnections();
+        }
+        
+        function endNodeDrag(e, nodeElement, mouseMoveHandler, mouseUpHandler) {
+            dragState.isDragging = false;
+            dragState.draggedNode = null;
+            
+            nodeElement.classList.remove('dragging');
+            
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+        
+        function startConnectionDrag(e, node, canvasRect) {
+            dragState.isConnecting = true;
+            connectingFrom = node;
+            
+            const nodeElement = document.getElementById(`node-${node.id}`);
+            nodeElement.classList.add('connecting');
+            
+            // Create preview path
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', 'connection-preview');
+            path.setAttribute('id', 'connection-preview');
+            
+            const nodeCenter = getNodeCenter(node);
+            path.setAttribute('d', `M ${nodeCenter.x} ${nodeCenter.y} L ${nodeCenter.x} ${nodeCenter.y}`);
+            
+            svg.appendChild(path);
+            dragState.previewLine = path;
+            
+            // Add global mouse listeners
+            const mouseMoveHandler = (e) => handleConnectionDrag(e, canvasRect);
+            const mouseUpHandler = (e) => endConnectionDrag(e, mouseMoveHandler, mouseUpHandler);
+            
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        }
+        
+        function handleConnectionDrag(e) {
+            if (!dragState.isConnecting || !dragState.previewLine) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const canvasCoords = screenToCanvas(screenX, screenY);
+            
+            // Create curved preview path - use canvas coordinates since SVG is in transform container
+            const fromPoint = getNodeEdgePoint(connectingFrom, canvasCoords);
+            const toPoint = canvasCoords;
+            const pathData = createCurvedPath(fromPoint, toPoint);
+            
+            dragState.previewLine.setAttribute('d', pathData);
+            
+            // Highlight nodes under cursor
+            const elementUnder = document.elementFromPoint(e.clientX, e.clientY);
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('hover-connect'));
+            
+            if (elementUnder && elementUnder.classList.contains('node') && 
+                elementUnder.id !== `node-${connectingFrom.id}`) {
+                elementUnder.classList.add('hover-connect');
+            }
+        }
+        
+        function endConnectionDrag(e, mouseMoveHandler, mouseUpHandler) {
+            const elementUnder = document.elementFromPoint(e.clientX, e.clientY);
+            
+            if (elementUnder && elementUnder.classList.contains('node') && 
+                elementUnder.id !== `node-${connectingFrom.id}`) {
+                
+                // Create connection
+                const targetNodeId = parseInt(elementUnder.id.replace('node-', ''));
+                const targetNode = nodes.find(n => n.id === targetNodeId);
+                
+                if (targetNode) {
+                    const connection = {
+                        id: Date.now(),
+                        from: connectingFrom.id,
+                        to: targetNode.id
+                    };
+                    connections.push(connection);
+                    renderConnection(connection);
+                    updateStatus();
+                    log(`Connected: ${connectingFrom.label} -> ${targetNode.label}`, 'success');
+                }
+            }
+            
+            // Cleanup
+            dragState.isConnecting = false;
+            if (dragState.previewLine) {
+                dragState.previewLine.remove();
+                dragState.previewLine = null;
+            }
+            
+            if (connectingFrom) {
+                document.getElementById(`node-${connectingFrom.id}`).classList.remove('connecting');
+                connectingFrom = null;
+            }
+            
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('hover-connect'));
+            
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        }
+        
+        function handleNodeMouseMove(e, node) {
+            if (dragState.isDragging || dragState.isConnecting) return;
+            if (currentMode !== 'normal') return;
+            
+            const nodeElement = document.getElementById(`node-${node.id}`);
+            const nodeRect = nodeElement.getBoundingClientRect();
+            const mouseX = e.clientX - nodeRect.left;
+            const mouseY = e.clientY - nodeRect.top;
+            const nodeWidth = nodeRect.width;
+            const nodeHeight = nodeRect.height;
+            
+            // Check if mouse is inside the node
+            const isInsideNode = mouseX >= 0 && mouseX <= nodeWidth && 
+                                mouseY >= 0 && mouseY <= nodeHeight;
+            
+            // Border zone detection (edges of visible node)
+            const borderZone = 8; // reduced from 15 for easier node dragging
+            const isInBorderZone = isInsideNode && 
+                                   (mouseX < borderZone || mouseX > nodeWidth - borderZone || 
+                                    mouseY < borderZone || mouseY > nodeHeight - borderZone);
+            
+            // Show connection zone only if on border, not in center
+            if (isInBorderZone) {
+                nodeElement.classList.add('connection-zone');
+                nodeElement.style.cursor = 'crosshair';
+            } else {
+                nodeElement.classList.remove('connection-zone');
+                nodeElement.style.cursor = 'move';
+            }
+        }
+        
+        // Add canvas-level mouse move handler for proximity detection
+        function handleCanvasMouseMove(e) {
+            if (dragState.isDragging || dragState.isConnecting) return;
+            if (currentMode !== 'normal') return;
+            
+            // Check proximity to all nodes
+            nodes.forEach(node => {
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                const nodeRect = nodeElement.getBoundingClientRect();
+                const mouseX = e.clientX - nodeRect.left;
+                const mouseY = e.clientY - nodeRect.top;
+                const nodeWidth = nodeRect.width;
+                const nodeHeight = nodeRect.height;
+                
+                // Check if mouse is inside the node
+                const isInsideNode = mouseX >= 0 && mouseX <= nodeWidth && 
+                                    mouseY >= 0 && mouseY <= nodeHeight;
+                
+                // Proximity detection - only outside the node
+                const proximityZone = 20;
+                const isInProximityZone = mouseX >= -proximityZone && mouseX <= nodeWidth + proximityZone && 
+                                         mouseY >= -proximityZone && mouseY <= nodeHeight + proximityZone;
+                
+                // Only show connection zone if in proximity but NOT inside the node
+                if (isInProximityZone && !isInsideNode) {
+                    nodeElement.classList.add('connection-zone');
+                    canvas.style.cursor = 'crosshair';
+                } else if (!isInsideNode) {
+                    // Only remove if not inside (let node's own handler manage inside behavior)
+                    nodeElement.classList.remove('connection-zone');
+                }
+            });
+            
+            // Reset cursor if not near any node
+            const anyNodeHasConnectionZone = document.querySelector('.node.connection-zone');
+            if (!anyNodeHasConnectionZone) {
+                canvas.style.cursor = 'grab';
+            }
+        }
+        
+        function handleNodeMouseEnter(e, node) {
+            if (dragState.isConnecting && connectingFrom && connectingFrom.id !== node.id) {
+                e.target.classList.add('hover-connect');
+            }
+        }
+        
+        function handleNodeMouseLeave(e, node) {
+            e.target.classList.remove('hover-connect', 'connection-zone');
+            e.target.style.cursor = 'move';
+        }
+        
+        function getNodeCenter(node) {
+            return {
+                x: node.x + 50, // half of typical node width
+                y: node.y + 20  // half of typical node height
+            };
+        }
+        
+        function findNearbyNode(clientX, clientY) {
+            for (let node of nodes) {
+                const nodeElement = document.getElementById(`node-${node.id}`);
+                const nodeRect = nodeElement.getBoundingClientRect();
+                const mouseX = clientX - nodeRect.left;
+                const mouseY = clientY - nodeRect.top;
+                const nodeWidth = nodeRect.width;
+                const nodeHeight = nodeRect.height;
+                
+                // Check if mouse is in proximity zone
+                const proximityZone = 20;
+                const isNearNode = mouseX >= -proximityZone && mouseX <= nodeWidth + proximityZone && 
+                                  mouseY >= -proximityZone && mouseY <= nodeHeight + proximityZone;
+                
+                if (isNearNode) {
+                    return node;
+                }
+            }
+            return null;
+        }
+        
+        function handleConnectionClick(e, connection) {
+            e.stopPropagation();
+            
+            if (currentMode !== 'normal') return;
+            
+            const isCtrlClick = e.ctrlKey || e.metaKey;
+            
+            if (!isCtrlClick) {
+                // Single selection - clear others first
+                clearSelection();
+            }
+            
+            // Toggle this connection's selection
+            if (selectedConnections.has(connection.id)) {
+                selectedConnections.delete(connection.id);
+                updateConnectionVisual(connection.id, false);
+            } else {
+                selectedConnections.add(connection.id);
+                updateConnectionVisual(connection.id, true);
+            }
+            
+            updateSelectionUI();
+            log(`${selectedConnections.has(connection.id) ? 'Selected' : 'Deselected'} connection`, 'info');
+        }
+        
+        function updateConnectionVisual(connectionId, isSelected) {
+            // Update visible path
+            const visiblePath = svg.querySelector(`path[data-connection-id="${connectionId}"]`);
+            if (visiblePath) {
+                if (isSelected) {
+                    visiblePath.classList.add('selected');
+                } else {
+                    visiblePath.classList.remove('selected');
+                }
+            }
+            
+            // Update arrow
+            const arrow = svg.querySelector(`polygon[data-connection-id="${connectionId}"]`);
+            if (arrow) {
+                if (isSelected) {
+                    arrow.classList.add('selected');
+                } else {
+                    arrow.classList.remove('selected');
+                }
+            }
+        }
+        
+        function clearSelection() {
+            // Clear node selections
+            selectedNodes.forEach(nodeId => {
+                const element = document.getElementById(`node-${nodeId}`);
+                if (element) element.classList.remove('selected');
+            });
+            selectedNodes.clear();
+            
+            // Clear connection selections
+            selectedConnections.forEach(connectionId => {
+                updateConnectionVisual(connectionId, false);
+            });
+            selectedConnections.clear();
+            
+            updateSelectionUI();
+        }
+        
+        function updateSelectionUI() {
+            const selectedCount = selectedNodes.size + selectedConnections.size;
+            const info = document.getElementById('selectionInfo');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+            
+            if (selectedCount === 0) {
+                info.textContent = 'Nothing selected';
+                deleteBtn.disabled = true;
+            } else {
+                const nodeText = selectedNodes.size === 1 ? 'node' : 'nodes';
+                const connText = selectedConnections.size === 1 ? 'connection' : 'connections';
+                
+                let text = '';
+                if (selectedNodes.size > 0) text += `${selectedNodes.size} ${nodeText}`;
+                if (selectedConnections.size > 0) {
+                    if (text) text += ', ';
+                    text += `${selectedConnections.size} ${connText}`;
+                }
+                text += ' selected';
+                
+                info.textContent = text;
+                deleteBtn.disabled = false;
+            }
+        }
+        
+        function handleNodeClick(e, node) {
+            // Only handle clicks if we're not dragging
+            if (dragState.isDragging || dragState.isConnecting) return;
+            
+            e.stopPropagation();
+            
+            const nodeElement = document.getElementById(`node-${node.id}`);
+            
+            if (currentMode === 'connect') {
+                if (!connectingFrom) {
+                    connectingFrom = node;
+                    nodeElement.classList.add('connecting');
+                    log(`Select target node to connect from: ${node.label}`, 'info');
+                } else if (connectingFrom.id !== node.id) {
+                    // Create connection
+                    const connection = {
+                        id: Date.now(),
+                        from: connectingFrom.id,
+                        to: node.id
+                    };
+                    connections.push(connection);
+                    renderConnection(connection);
+                    
+                    // Reset connecting state
+                    document.getElementById(`node-${connectingFrom.id}`).classList.remove('connecting');
+                    connectingFrom = null;
+                    log(`Connected: ${node.label} (via click mode)`, 'success');
+                    updateStatus();
+                }
+            } else if (currentMode === 'delete') {
+                deleteNodeById(node.id);
+            } else {
+                // Normal mode - handle selection
+                const isCtrlClick = e.ctrlKey || e.metaKey;
+                
+                if (!isCtrlClick) {
+                    // Single selection - clear others first
+                    clearSelection();
+                }
+                
+                // Toggle this node's selection
+                if (selectedNodes.has(node.id)) {
+                    selectedNodes.delete(node.id);
+                    nodeElement.classList.remove('selected');
+                } else {
+                    selectedNodes.add(node.id);
+                    nodeElement.classList.add('selected');
+                }
+                
+                updateSelectionUI();
+                log(`${selectedNodes.has(node.id) ? 'Selected' : 'Deselected'}: ${node.label}`, 'info');
+            }
+        }
+        
+        function deleteNodeById(nodeId) {
+            const nodeIndex = nodes.findIndex(n => n.id === nodeId);
+            if (nodeIndex === -1) return;
+            
+            const node = nodes[nodeIndex];
+            connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+            nodes.splice(nodeIndex, 1);
+            
+            const element = document.getElementById(`node-${nodeId}`);
+            if (element) element.remove();
+            
+            renderAllConnections();
+            updateStatus();
+            log(`Deleted: ${node.label}`, 'success');
+        }
+        
+        // Connection rendering
+        function renderConnection(connection) {
+            const fromNode = nodes.find(n => n.id === connection.from);
+            const toNode = nodes.find(n => n.id === connection.to);
+            
+            if (!fromNode || !toNode) {
+                console.log('Connection error: Missing nodes', { fromNode, toNode, connection });
+                return;
+            }
+            
+            console.log('Rendering connection:', { fromNode: fromNode.label, toNode: toNode.label });
+            
+            // Calculate connection points from node edges
+            const fromCenter = { x: fromNode.x + 50, y: fromNode.y + 20 };
+            const toCenter = { x: toNode.x + 50, y: toNode.y + 20 };
+            
+            // Calculate exit and entry points on node edges
+            const fromPoint = getNodeEdgePoint(fromNode, toCenter);
+            const toPoint = getNodeEdgePoint(toNode, fromCenter);
+            
+            console.log('Connection points:', { fromPoint, toPoint });
+            
+            // Create curved path (L-shaped with rounded corners)
+            const pathData = createCurvedPath(fromPoint, toPoint);
+            
+            console.log('Path data:', pathData);
+            
+            // Calculate arrow position and angle at the center of the path
+            const arrowInfo = calculateArrowPositionAtCenter(fromPoint, toPoint);
+            
+            // Create invisible thick path for clicking
+            const clickPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            clickPath.setAttribute('id', `connection-${connection.id}`);
+            clickPath.setAttribute('d', pathData);
+            clickPath.style.pointerEvents = 'stroke';
+            clickPath.style.strokeWidth = '12';
+            clickPath.style.stroke = 'transparent';
+            clickPath.style.fill = 'none';
+            clickPath.addEventListener('click', (e) => handleConnectionClick(e, connection));
+            
+            // Create visible curved path
+            const visiblePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            visiblePath.setAttribute('class', 'connection-line');
+            visiblePath.setAttribute('data-connection-id', connection.id);
+            visiblePath.setAttribute('d', pathData);
+            visiblePath.style.pointerEvents = 'none';
+            
+            // Create arrow at the center
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            arrow.setAttribute('class', 'connection-arrow');
+            arrow.setAttribute('data-connection-id', connection.id);
+            arrow.setAttribute('points', '-8,-4 8,0 -8,4');
+            arrow.setAttribute('transform', `translate(${arrowInfo.x},${arrowInfo.y}) rotate(${arrowInfo.angle})`);
+            arrow.style.pointerEvents = 'none';
+            
+            svg.appendChild(clickPath);
+            svg.appendChild(visiblePath);
+            svg.appendChild(arrow);
+        }
+        
+        // Calculate connection point on node edge
+        function getNodeEdgePoint(node, targetCenter) {
+            const nodeCenter = { x: node.x + 50, y: node.y + 20 };
+            const nodeWidth = 100;
+            const nodeHeight = 40;
+            
+            // Calculate direction vector
+            const dx = targetCenter.x - nodeCenter.x;
+            const dy = targetCenter.y - nodeCenter.y;
+            
+            // Determine which edge to connect to based on direction
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Connect to left or right edge
+                const edgeX = dx > 0 ? node.x + nodeWidth : node.x;
+                return { x: edgeX, y: nodeCenter.y };
+            } else {
+                // Connect to top or bottom edge
+                const edgeY = dy > 0 ? node.y + nodeHeight : node.y;
+                return { x: nodeCenter.x, y: edgeY };
+            }
+        }
+        
+        // Create curved L-shaped path
+        function createCurvedPath(fromPoint, toPoint) {
+            const dx = toPoint.x - fromPoint.x;
+            const dy = toPoint.y - fromPoint.y;
+            
+            // Determine if we should curve horizontally or vertically first
+            const curveDistance = Math.min(Math.abs(dx), Math.abs(dy)) * 0.3 + 20;
+            
+            let controlPoint1, controlPoint2;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Horizontal then vertical
+                controlPoint1 = { 
+                    x: fromPoint.x + (dx > 0 ? curveDistance : -curveDistance), 
+                    y: fromPoint.y 
+                };
+                controlPoint2 = { 
+                    x: toPoint.x - (dx > 0 ? curveDistance : -curveDistance), 
+                    y: toPoint.y 
+                };
+            } else {
+                // Vertical then horizontal
+                controlPoint1 = { 
+                    x: fromPoint.x, 
+                    y: fromPoint.y + (dy > 0 ? curveDistance : -curveDistance) 
+                };
+                controlPoint2 = { 
+                    x: toPoint.x, 
+                    y: toPoint.y - (dy > 0 ? curveDistance : -curveDistance) 
+                };
+            }
+            
+            // Create smooth curved path using cubic bezier
+            return `M ${fromPoint.x} ${fromPoint.y} 
+                    C ${controlPoint1.x} ${controlPoint1.y}, 
+                      ${controlPoint2.x} ${controlPoint2.y}, 
+                      ${toPoint.x} ${toPoint.y}`;
+        }
+        
+        // Calculate arrow position and angle at center of curved path
+        function calculateArrowPositionAtCenter(fromPoint, toPoint) {
+            const dx = toPoint.x - fromPoint.x;
+            const dy = toPoint.y - fromPoint.y;
+            
+            // Get the same control points as used in createCurvedPath
+            const curveDistance = Math.min(Math.abs(dx), Math.abs(dy)) * 0.3 + 20;
+            
+            let controlPoint1, controlPoint2;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Horizontal then vertical
+                controlPoint1 = { 
+                    x: fromPoint.x + (dx > 0 ? curveDistance : -curveDistance), 
+                    y: fromPoint.y 
+                };
+                controlPoint2 = { 
+                    x: toPoint.x - (dx > 0 ? curveDistance : -curveDistance), 
+                    y: toPoint.y 
+                };
+            } else {
+                // Vertical then horizontal
+                controlPoint1 = { 
+                    x: fromPoint.x, 
+                    y: fromPoint.y + (dy > 0 ? curveDistance : -curveDistance) 
+                };
+                controlPoint2 = { 
+                    x: toPoint.x, 
+                    y: toPoint.y - (dy > 0 ? curveDistance : -curveDistance) 
+                };
+            }
+            
+            // Calculate position and tangent at t=0.5 (center) of cubic Bézier curve
+            const t = 0.5;
+            
+            // Position calculation: B(t) = (1-t)³P₀ + 3(1-t)²tP₁ + 3(1-t)t²P₂ + t³P₃
+            const oneMinusT = 1 - t;
+            const centerX = oneMinusT * oneMinusT * oneMinusT * fromPoint.x +
+                           3 * oneMinusT * oneMinusT * t * controlPoint1.x +
+                           3 * oneMinusT * t * t * controlPoint2.x +
+                           t * t * t * toPoint.x;
+            
+            const centerY = oneMinusT * oneMinusT * oneMinusT * fromPoint.y +
+                           3 * oneMinusT * oneMinusT * t * controlPoint1.y +
+                           3 * oneMinusT * t * t * controlPoint2.y +
+                           t * t * t * toPoint.y;
+            
+            // Tangent calculation: B'(t) = 3(1-t)²(P₁-P₀) + 6(1-t)t(P₂-P₁) + 3t²(P₃-P₂)
+            const tangentX = 3 * oneMinusT * oneMinusT * (controlPoint1.x - fromPoint.x) +
+                            6 * oneMinusT * t * (controlPoint2.x - controlPoint1.x) +
+                            3 * t * t * (toPoint.x - controlPoint2.x);
+            
+            const tangentY = 3 * oneMinusT * oneMinusT * (controlPoint1.y - fromPoint.y) +
+                            6 * oneMinusT * t * (controlPoint2.y - controlPoint1.y) +
+                            3 * t * t * (toPoint.y - controlPoint2.y);
+            
+            // Calculate angle from tangent vector
+            const angle = Math.atan2(tangentY, tangentX) * 180 / Math.PI;
+            
+            return { x: centerX, y: centerY, angle: angle };
+        }
+        
+        function renderAllConnections() {
+            // Clear existing connections (paths, arrows, and click targets)
+            svg.querySelectorAll('.connection-line, .connection-arrow, path[id^="connection-"], line[id^="connection-"]').forEach(el => el.remove());
+            
+            // Re-render all connections
+            connections.forEach(connection => {
+                renderConnection(connection);
+                // Restore selection state if needed
+                if (selectedConnections.has(connection.id)) {
+                    updateConnectionVisual(connection.id, true);
+                }
+            });
+        }
+        
+        // Mode management
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Reset states
+            connectingFrom = null;
+            dragState.isConnecting = false;
+            
+            // Clear selections when not in normal mode
+            if (mode !== 'normal') {
+                clearSelection();
+            }
+            
+            // Clean up any preview lines
+            if (dragState.previewLine) {
+                dragState.previewLine.remove();
+                dragState.previewLine = null;
+            }
+            
+            document.querySelectorAll('.node').forEach(n => {
+                n.classList.remove('connecting', 'hover-connect');
+                if (mode !== 'normal') {
+                    n.classList.remove('selected');
+                }
+            });
+            
+            // Update UI
+            const modeText = mode === 'normal' ? 'Normal (drag nodes, edge-drag to connect)' : 
+                            mode.charAt(0).toUpperCase() + mode.slice(1);
+            document.getElementById('currentMode').textContent = `Mode: ${modeText}`;
+            
+            // Reset all button styles first
+            document.querySelectorAll('.controls-content button').forEach(btn => {
+                btn.style.backgroundColor = '';
+            });
+            
+            // Update button states
+            const activeBtn = {
+                'normal': 'normalBtn',
+                'connect': 'connectBtn',
+                'delete': 'deleteBtn'
+            }[mode];
+            
+            if (activeBtn) {
+                document.getElementById(activeBtn).style.backgroundColor = '#28a745';
+            }
+            
+            log(`Mode: ${mode} ${mode === 'normal' ? '(drag center=move, drag edge=connect)' : ''}`, 'info');
+        }
+        
+        // UI helper functions
+        function updateStatus() {
+            document.getElementById('nodeCount').textContent = `Nodes: ${nodes.length}`;
+            document.getElementById('connectionCount').textContent = `Connections: ${connections.length}`;
+        }
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('statusLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Keep only last 50 entries
+            while (logElement.children.length > 50) {
+                logElement.removeChild(logElement.firstChild);
+            }
+        }
+        
+        // Public functions for buttons
+        window.showAddNodeDialog = function() {
+            const label = prompt('Enter node label:', 'New Node');
+            if (label) {
+                const node = createNodeData(label);
+                nodes.push(node);
+                renderNode(node);
+                updateStatus();
+                log(`Added node: ${label}`, 'success');
+            }
+        };
+
+        // Chat functionality
+        function addChatMessage(content, type = 'system') {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            messageDiv.textContent = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function insertHint(text) {
+            document.getElementById('chatInput').value = text;
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Simulate AI processing
+            addChatMessage('🤔 Thinking...', 'assistant');
+            
+            try {
+                const response = await simulateAIResponse(message);
+                
+                // Remove thinking message
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.removeChild(chatMessages.lastChild);
+                
+                // Add AI response
+                addChatMessage(response.explanation, 'assistant');
+                
+                // Execute tool calls one by one with delays for visual effect
+                if (response.toolCalls && response.toolCalls.length > 0) {
+                    addChatMessage(`🔧 Executing ${response.toolCalls.length} actions...`, 'assistant');
+                    
+                    // Execute tool calls one by one with delays
+                    for (let i = 0; i < response.toolCalls.length; i++) {
+                        const toolCall = response.toolCalls[i];
+                        
+                        try {
+                            // Show what we're about to do
+                            const paramStr = Object.keys(toolCall.parameters).length > 0 
+                                ? Object.keys(toolCall.parameters).map(k => `${k}: "${toolCall.parameters[k]}"`).join(', ')
+                                : 'no parameters';
+                            addChatMessage(`⚡ ${toolCall.function}(${paramStr})`, 'system');
+                            
+                            // Execute single tool call
+                            const mcpToolCall = {
+                                tool: toolCall.function,
+                                args: toolCall.parameters
+                            };
+                            
+                            const results = await mcp.execute([mcpToolCall]);
+                            const result = results[0];
+                            
+                            if (result.error) {
+                                log(`Tool error: ${result.tool} - ${result.error}`, 'error');
+                                addChatMessage(`❌ Error: ${result.error}`, 'assistant');
+                            } else {
+                                log(`✓ ${result.tool}: Success`, 'success');
+                            }
+                            
+                            // Add delay between tool calls (except for the last one)
+                            if (i < response.toolCalls.length - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            }
+                            
+                        } catch (error) {
+                            log(`Execution error: ${error.message}`, 'error');
+                            addChatMessage(`❌ Execution error: ${error.message}`, 'assistant');
+                            break; // Stop execution on error
+                        }
+                    }
+                    
+                    addChatMessage(`✅ Completed all actions successfully!`, 'assistant');
+                }
+                
+            } catch (error) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.removeChild(chatMessages.lastChild);
+                addChatMessage(`Error: ${error.message}`, 'assistant');
+            }
+        }
+
+        // AI simulation function
+        async function simulateAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            if (message.includes('authentication') || message.includes('auth') || message.includes('login')) {
+                return {
+                    explanation: "I'll create a user authentication flow diagram showing the login process with security checks.",
+                    toolCalls: [
+                        { function: 'clear_canvas', parameters: {} },
+                        { function: 'add_start_node', parameters: { label: 'User Login', x: 100, y: 200 } },
+                        { function: 'add_node', parameters: { label: 'Enter Credentials', x: 300, y: 200 } },
+                        { function: 'add_decision_node', parameters: { label: 'Valid?', x: 500, y: 200 } },
+                        { function: 'add_node', parameters: { label: 'Check 2FA', x: 700, y: 150 } },
+                        { function: 'add_decision_node', parameters: { label: '2FA Valid?', x: 900, y: 150 } },
+                        { function: 'add_end_node', parameters: { label: 'Access Granted', x: 1100, y: 150 } },
+                        { function: 'add_end_node', parameters: { label: 'Access Denied', x: 700, y: 300 } },
+                        { function: 'connect_nodes', parameters: { from: 'User Login', to: 'Enter Credentials' } },
+                        { function: 'connect_nodes', parameters: { from: 'Enter Credentials', to: 'Valid?' } },
+                        { function: 'connect_nodes', parameters: { from: 'Valid?', to: 'Check 2FA', label: 'Yes' } },
+                        { function: 'connect_nodes', parameters: { from: 'Valid?', to: 'Access Denied', label: 'No' } },
+                        { function: 'connect_nodes', parameters: { from: 'Check 2FA', to: '2FA Valid?' } },
+                        { function: 'connect_nodes', parameters: { from: '2FA Valid?', to: 'Access Granted', label: 'Yes' } },
+                        { function: 'connect_nodes', parameters: { from: '2FA Valid?', to: 'Access Denied', label: 'No' } }
+                    ]
+                };
+            }
+            
+            if (message.includes('microservices') || message.includes('architecture')) {
+                return {
+                    explanation: "I'll design a microservices architecture diagram showing service interactions.",
+                    toolCalls: [
+                        { function: 'clear_canvas', parameters: {} },
+                        { function: 'add_node', parameters: { label: 'API Gateway', x: 300, y: 100 } },
+                        { function: 'add_node', parameters: { label: 'User Service', x: 150, y: 250 } },
+                        { function: 'add_node', parameters: { label: 'Auth Service', x: 300, y: 250 } },
+                        { function: 'add_node', parameters: { label: 'Product Service', x: 450, y: 250 } },
+                        { function: 'add_node', parameters: { label: 'Order Service', x: 300, y: 400 } },
+                        { function: 'add_node', parameters: { label: 'Payment Service', x: 500, y: 400 } },
+                        { function: 'add_node', parameters: { label: 'Database', x: 300, y: 550 } },
+                        { function: 'connect_nodes', parameters: { from: 'API Gateway', to: 'User Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'API Gateway', to: 'Auth Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'API Gateway', to: 'Product Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'User Service', to: 'Order Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'Product Service', to: 'Order Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'Order Service', to: 'Payment Service' } },
+                        { function: 'connect_nodes', parameters: { from: 'Order Service', to: 'Database' } },
+                        { function: 'arrange_flow', parameters: { direction: 'vertical' } }
+                    ]
+                };
+            }
+            
+            // Default response for general requests
+            return {
+                explanation: "I can help you create flowcharts! Try asking me about authentication flows or microservices architecture. I'll use MCP tools to build the diagram for you.",
+                toolCalls: []
+            };
+        }
+
+        window.sendChatMessage = sendChatMessage;
+        window.insertHint = insertHint;
+        window.handleChatKeyPress = handleChatKeyPress;
+        
+        window.connectMode = function() {
+            setMode('connect');
+        };
+        
+        window.deleteMode = function() {
+            setMode('delete');
+        };
+        
+        window.normalMode = function() {
+            setMode('normal');
+        };
+        
+        window.clearCanvas = function() {
+            if (confirm('Are you sure you want to clear all nodes and connections?')) {
+                nodes = [];
+                connections = [];
+                transformContainer.querySelectorAll('.node').forEach(node => node.remove());
+                svg.innerHTML = svg.querySelector('defs').outerHTML;
+                updateStatus();
+                log('Canvas cleared', 'success');
+            }
+        };
+        
+        window.centerNodes = function() {
+            if (nodes.length === 0) return;
+            
+            const canvasWidth = canvas.offsetWidth / canvasTransform.scale;
+            const canvasHeight = canvas.offsetHeight / canvasTransform.scale;
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+            const radius = Math.min(centerX, centerY) * 0.6;
+            
+            nodes.forEach((node, index) => {
+                const angle = (index / nodes.length) * 2 * Math.PI;
+                node.x = centerX + Math.cos(angle) * radius - 50;
+                node.y = centerY + Math.sin(angle) * radius - 20;
+                
+                const element = document.getElementById(`node-${node.id}`);
+                element.style.left = node.x + 'px';
+                element.style.top = node.y + 'px';
+            });
+            
+            renderAllConnections();
+            log('Nodes centered', 'info');
+        };
+        
+        window.resetZoom = function() {
+            canvasTransform.x = 0;
+            canvasTransform.y = 0;
+            canvasTransform.scale = 1;
+            applyCanvasTransform();
+            log('Zoom reset to 100%', 'info');
+        };
+        
+        window.clearLog = function() {
+            document.getElementById('statusLog').innerHTML = '';
+        };
+        
+        // MCP Functions Modal
+        window.showMCPFunctions = function() {
+            const modal = document.getElementById('mcpModal');
+            const functionList = document.getElementById('functionList');
+            
+            // Get all registered MCP functions
+            const functions = mcp.listTools();
+            
+            // Clear existing content
+            functionList.innerHTML = '';
+            
+            // Populate function list
+            functions.forEach(func => {
+                const functionDiv = document.createElement('div');
+                functionDiv.className = 'function-item';
+                
+                functionDiv.innerHTML = `
+                    <div class="function-name">${func.name}</div>
+                    <div class="function-description">${func.description || 'No description available'}</div>
+                    <div class="function-schema">${JSON.stringify(func.schema, null, 2)}</div>
+                `;
+                
+                functionList.appendChild(functionDiv);
+            });
+            
+            // Show modal
+            modal.style.display = 'flex';
+        };
+        
+        window.closeMCPModal = function() {
+            document.getElementById('mcpModal').style.display = 'none';
+        };
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('mcpModal');
+            if (e.target === modal) {
+                closeMCPModal();
+            }
+        });
+        
+        window.deleteSelected = function() {
+            if (selectedNodes.size === 0 && selectedConnections.size === 0) return;
+            
+            const totalSelected = selectedNodes.size + selectedConnections.size;
+            if (!confirm(`Delete ${totalSelected} selected item(s)?`)) return;
+            
+            // Delete selected connections first
+            selectedConnections.forEach(connectionId => {
+                const connectionIndex = connections.findIndex(c => c.id === connectionId);
+                if (connectionIndex !== -1) {
+                    connections.splice(connectionIndex, 1);
+                }
+                
+                // Remove all related elements from DOM
+                const elements = svg.querySelectorAll(`#connection-${connectionId}, [data-connection-id="${connectionId}"]`);
+                elements.forEach(el => el.remove());
+            });
+            
+            // Delete selected nodes
+            selectedNodes.forEach(nodeId => {
+                const nodeIndex = nodes.findIndex(n => n.id === nodeId);
+                if (nodeIndex !== -1) {
+                    const node = nodes[nodeIndex];
+                    
+                    // Remove connections involving this node
+                    connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+                    
+                    // Remove node
+                    nodes.splice(nodeIndex, 1);
+                    
+                    // Remove from DOM
+                    const element = document.getElementById(`node-${nodeId}`);
+                    if (element) element.remove();
+                }
+            });
+            
+            // Clear selections and update UI
+            selectedNodes.clear();
+            selectedConnections.clear();
+            renderAllConnections();
+            updateStatus();
+            updateSelectionUI();
+            log(`Deleted ${totalSelected} item(s)`, 'success');
+        };
+        
+        window.selectAll = function() {
+            clearSelection();
+            
+            // Select all nodes
+            nodes.forEach(node => {
+                selectedNodes.add(node.id);
+                const element = document.getElementById(`node-${node.id}`);
+                if (element) element.classList.add('selected');
+            });
+            
+            // Select all connections
+            connections.forEach(connection => {
+                selectedConnections.add(connection.id);
+                updateConnectionVisual(connection.id, true);
+            });
+            
+            updateSelectionUI();
+            log(`Selected ${nodes.length + connections.length} item(s)`, 'info');
+        };
+        
+        window.clearSelection = function() {
+            clearSelection();
+            log('Selection cleared', 'info');
+        };
+        
+        // Canvas event handlers
+        canvas.addEventListener('click', (e) => {
+            console.log('Canvas click event:', e.target === canvas, currentMode, !canvasPanState.isPanning);
+            if (e.target === canvas && currentMode === 'normal' && !canvasPanState.isPanning) {
+                clearSelection();
+                log('Canvas clicked - selection cleared', 'info');
+            }
+        });
+        
+        // Canvas panning
+        canvas.addEventListener('mousedown', (e) => {
+            console.log('Canvas mousedown event:', e.target, e.target === canvas);
+            
+            // Only handle if directly clicking on canvas background
+            if (e.target !== canvas) return;
+            if (currentMode !== 'normal') return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const canvasCoords = screenToCanvas(screenX, screenY);
+            
+            console.log('Canvas mousedown - checking for nearby nodes');
+            
+            // Check if we're near any node for proximity-based connection
+            const nearbyNode = findNearbyNode(e.clientX, e.clientY);
+            if (nearbyNode) {
+                console.log('Found nearby node, starting connection drag');
+                startConnectionDrag(e, nearbyNode, rect);
+                return;
+            }
+            
+            console.log('No nearby node, starting pan');
+            
+            // Start canvas panning
+            canvasPanState.isPanning = true;
+            canvasPanState.startX = e.clientX;
+            canvasPanState.startY = e.clientY;
+            canvasPanState.startTransformX = canvasTransform.x;
+            canvasPanState.startTransformY = canvasTransform.y;
+            
+            canvas.style.cursor = 'grabbing';
+            log('Started canvas panning', 'info');
+            
+            const handlePanMove = (e) => {
+                if (!canvasPanState.isPanning) return;
+                
+                const deltaX = e.clientX - canvasPanState.startX;
+                const deltaY = e.clientY - canvasPanState.startY;
+                
+                canvasTransform.x = canvasPanState.startTransformX + deltaX;
+                canvasTransform.y = canvasPanState.startTransformY + deltaY;
+                
+                applyCanvasTransform();
+            };
+            
+            const handlePanEnd = (e) => {
+                canvasPanState.isPanning = false;
+                canvas.style.cursor = 'grab';
+                log('Ended canvas panning', 'info');
+                
+                document.removeEventListener('mousemove', handlePanMove);
+                document.removeEventListener('mouseup', handlePanEnd);
+            };
+            
+            document.addEventListener('mousemove', handlePanMove);
+            document.addEventListener('mouseup', handlePanEnd);
+        });
+        
+        // Canvas zooming - improved smooth zoom
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // More granular zoom control for smoothness
+            const zoomIntensity = 0.05; // Much smaller steps
+            const wheel = e.deltaY < 0 ? 1 : -1;
+            const zoom = Math.exp(wheel * zoomIntensity);
+            
+            const newScale = Math.max(0.2, Math.min(5, canvasTransform.scale * zoom));
+            
+            if (newScale !== canvasTransform.scale) {
+                // Calculate the point in canvas space that the mouse is pointing to
+                const mousePointBefore = {
+                    x: (mouseX - canvasTransform.x) / canvasTransform.scale,
+                    y: (mouseY - canvasTransform.y) / canvasTransform.scale
+                };
+                
+                // Update the scale
+                canvasTransform.scale = newScale;
+                
+                // Calculate where the mouse point should be after scaling
+                const mousePointAfter = {
+                    x: mousePointBefore.x * canvasTransform.scale + canvasTransform.x,
+                    y: mousePointBefore.y * canvasTransform.scale + canvasTransform.y
+                };
+                
+                // Adjust transform to keep the mouse point fixed
+                canvasTransform.x -= (mousePointAfter.x - mouseX);
+                canvasTransform.y -= (mousePointAfter.y - mouseY);
+                
+                applyCanvasTransform();
+                
+                // Show zoom level (throttled)
+                clearTimeout(window.zoomLogTimeout);
+                window.zoomLogTimeout = setTimeout(() => {
+                    const zoomPercent = Math.round(canvasTransform.scale * 100);
+                    log(`Zoom: ${zoomPercent}%`, 'info');
+                }, 100);
+            }
+        });
+        
+        // Add canvas-level mouse move for proximity detection
+        canvas.addEventListener('mousemove', handleCanvasMouseMove);
+        
+        // Initialize
+        initializeMCPTools();
+        initializeSVG();
+        updateStatus();
+        updateSelectionUI();
+        setMode('normal');
+        applyCanvasTransform(); // Apply initial transform
+        log('🧠 MCP Flowchart Demo initialized - Chat with AI to create flowcharts!', 'success');
+        
+        // Add welcome message to chat
+        setTimeout(() => {
+            // addChatMessage('Welcome to the MCP Flowchart Demo! 🎨', 'system');
+            addChatMessage('Try one of the hint buttons above, or ask me to create any type of flowchart. I\'ll use MCP tools to build it for you!', 'system');
+        }, 500);
+    </script>
+</body>
+</html>

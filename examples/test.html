@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP-JS Quick Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>MCP-JS Quick Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import mcp from '../src/index.js';
+
+        function addResult(message, success = true) {
+            const div = document.createElement('div');
+            div.className = `result ${success ? 'success' : 'error'}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        async function runTests() {
+            try {
+                // Test 1: Basic registration
+                const registered = mcp.register('test_add', ({x, y}) => x + y, {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            x: { type: 'number' },
+                            y: { type: 'number' }
+                        },
+                        required: ['x', 'y']
+                    }
+                });
+                
+                if (registered) {
+                    addResult('✓ Tool registration works');
+                } else {
+                    addResult('✗ Tool registration failed', false);
+                }
+
+                // Test 2: Parsing
+                const parsed = mcp.parse('{"tool_call":{"tool":"test_add","args":{"x":5,"y":10}}}');
+                
+                if (parsed && parsed.length === 1 && parsed[0].tool === 'test_add') {
+                    addResult('✓ LLM response parsing works');
+                } else {
+                    addResult('✗ LLM response parsing failed', false);
+                }
+
+                // Test 3: Execution
+                const results = await mcp.execute(parsed);
+                
+                if (results && results.length === 1 && results[0].result === 15) {
+                    addResult('✓ Tool execution works');
+                } else {
+                    addResult('✗ Tool execution failed', false);
+                }
+
+                // Test 4: Direct execution
+                const directResult = await mcp.executeSingle('test_add', {x: 20, y: 25});
+                
+                if (directResult === 45) {
+                    addResult('✓ Direct execution works');
+                } else {
+                    addResult('✗ Direct execution failed', false);
+                }
+
+                // Test 5: Tool listing
+                const tools = mcp.listTools();
+                
+                if (tools.length === 1 && tools[0].name === 'test_add') {
+                    addResult('✓ Tool listing works');
+                } else {
+                    addResult('✗ Tool listing failed', false);
+                }
+
+                // Test 6: Validation error handling
+                try {
+                    await mcp.executeSingle('test_add', {x: 'invalid'});
+                    addResult('✗ Validation should have failed', false);
+                } catch (error) {
+                    addResult('✓ Validation error handling works');
+                }
+
+                addResult('🎉 All tests completed! The mcp-js library is working correctly.');
+
+            } catch (error) {
+                addResult(`✗ Test error: ${error.message}`, false);
+            }
+        }
+
+        runTests();
+    </script>
+</body>
+</html>

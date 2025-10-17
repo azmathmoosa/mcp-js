@@ -1,0 +1,26 @@
+# Development files
+node_modules/
+vite.config.js
+test.js
+
+# Examples (optional - you might want to include these)
+examples/
+
+# Build artifacts
+dist/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
