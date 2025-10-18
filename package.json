@@ -1,5 +1,5 @@
 {
-  "name": "@azmathmoosa/mcp-js",
+  "name": "@azmai/mcp-js",
   "version": "0.1.0",
   "description": "Browser-native MCP runtime for handling LLM tool calls",
   "main": "src/index.js",

@@ -2,7 +2,7 @@
 
 A lightweight, browser-native runtime for handling LLM tool calls with full **Model Context Protocol (MCP)** JSON-RPC 2.0 compliance.
 
-[![npm version](https://badge.fury.io/js/@azmathmoosa%2Fmcp-js.svg)](https://www.npmjs.com/package/@azmathmoosa/mcp-js)
+[![npm version](https://badge.fury.io/js/@azmai%2Fmcp-js.svg)](https://www.npmjs.com/package/@azmai/mcp-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
@@ -68,13 +68,13 @@ mcp.register('update_ui_theme', ({theme, highlightSelector}) => {
 ### Installation
 
 ```bash
-npm install @azmathmoosa/mcp-js
+npm install @azmai/mcp-js
 ```
 
 ### Basic Usage
 
 ```js
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 // Enable debug logging
 mcp.debug = true;
@@ -109,7 +109,7 @@ mcp-js now implements the full **Model Context Protocol (MCP)** specification wi
 ### Quick MCP Example
 
 ```js
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 // Register tools normally
 mcp.register('calculate', ({op, a, b}) => {
@@ -394,7 +394,7 @@ console.log(stats);
 
 ```jsx
 import { useState, useEffect } from 'react';
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 function ToolExecutor() {
   const [result, setResult] = useState(null);
@@ -441,7 +441,7 @@ function ToolExecutor() {
 </template>
 
 <script>
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 export default {
   data() {
@@ -519,7 +519,7 @@ mcp.register('safe_divide', ({x, y}) => {
 ### Custom Validation
 
 ```js
-import { schemaValidator } from '@azmathmoosa/mcp-js';
+import { schemaValidator } from '@azmai/mcp-js';
 
 // Add custom format validator
 schemaValidator.ajv.addFormat('email', /^[^@]+@[^@]+\.[^@]+$/);
@@ -588,7 +588,7 @@ Open `examples/demo.html` in your browser to see an interactive demonstration of
 
 ```js
 import { WebSocketServer } from 'ws';
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 // Register your tools
 mcp.register('greet', ({name}) => `Hello, ${name}!`, {
@@ -618,7 +618,7 @@ wss.on('connection', (ws) => {
 
 ```js
 import express from 'express';
-import mcp from '@azmathmoosa/mcp-js';
+import mcp from '@azmai/mcp-js';
 
 const app = express();
 app.use(express.json());
@@ -700,7 +700,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [npm package](https://www.npmjs.com/package/@azmathmoosa/mcp-js)
+- [npm package](https://www.npmjs.com/package/@azmai/mcp-js)
 - [GitHub repository](https://github.com/azmathmoosa/mcp-js)
 - [Documentation](https://github.com/azmathmoosa/mcp-js#readme)
 - [Issues](https://github.com/azmathmoosa/mcp-js/issues)
